@@ -1023,7 +1023,6 @@ elif filter_mode == "Moon–Mercury Aspects":
         (df_summary["D1 Aspects"] != "0") | (df_summary["D9 Aspects"] != "0")
     ]
 
-
     st.markdown("### 📅 Final Moon–Mercury Aspect Table")
     def render_aspect_table(df):
         rows_html = []
@@ -1678,10 +1677,10 @@ elif filter_mode == "AOT Monthly Calendar":
 
         # === Moon–Mercury D1 Aspect (0–23 IST)
         d1_aspect = "0"
-        for hour in range(0, 24):
-            dt = datetime(current.year, current.month, current.day, hour)
+        for hour in range(0, 23):
+            dt = datetime(current.year, current.month, current.day, hour, 0)
             utc_dt = dt - timedelta(hours=TZ_OFFSET)
-            jd_hour = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour)
+            jd_hour = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute / 60)
             m_deg = get_planet_deg(jd_hour, "Moon")
             mc_deg = get_planet_deg(jd_hour, "Mercury")
             asp = check_mm_aspects(m_deg, mc_deg)
@@ -1691,10 +1690,10 @@ elif filter_mode == "AOT Monthly Calendar":
 
         # === Moon–Mercury D9 Aspect (8–16 IST)
         d9_aspect = "0"
-        for hour in range(8, 17):
-            dt = datetime(current.year, current.month, current.day, hour)
+        for hour in range(8, 16):
+            dt = datetime(current.year, current.month, current.day, hour, 0)
             utc_dt = dt - timedelta(hours=TZ_OFFSET)
-            jd_hour = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour)
+            jd_hour = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute / 60)
             m_deg = get_planet_deg(jd_hour, "Moon")
             mc_deg = get_planet_deg(jd_hour, "Mercury")
             m_d9 = get_d9_longitude(m_deg)
@@ -1709,14 +1708,14 @@ elif filter_mode == "AOT Monthly Calendar":
             "Day Type": day_type,
             "Moon & Mercury D1 Type": mm_d1_status,
             "Moon & Mercury D9 Type": mm_d9_status,
-            "D1 Aspect": d1_aspect,
-            "D9 Aspect": d9_aspect,
+            "Moon & Mercury D1 Aspect": d1_aspect,
+            "Moon & Mercury D9 Aspect": d9_aspect,
             "Ascendant Nakshatra": nak,
             "Ascendant Pada": pada,
             "Prachanda": prachanda_str,
             "Pawan": pawan_str,
-            "D1 Aspects": d1_aspect_result,
-            "D9 Aspects": d9_aspect_result,
+            "Planetary D1 Aspects": d1_aspect_result,
+            "Planetary D9 Aspects": d9_aspect_result,
             "Ingress Planet": ingress_changes[0][0] if ingress_changes else "",
             "From Sign": ingress_changes[0][1] if ingress_changes else "",
             "To Sign": ingress_changes[0][2] if ingress_changes else "",
@@ -1733,3 +1732,6 @@ elif filter_mode == "AOT Monthly Calendar":
     st.markdown("### 📊 Daily AOT View (with Moon–Mercury Aspects)")
     html = df.to_html()
     st.markdown(f'<div class="scroll-table">{html}</div>', unsafe_allow_html=True)
+
+    st.dataframe(df)
+
