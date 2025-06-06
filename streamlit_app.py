@@ -221,14 +221,6 @@ planets = {
 
 st.title("📊 Numeroniq")
 
-st.html("""
-<style>
-[data-testid=stElementToolbarButton]:first-of-type {
-    display: none;
-}
-</style>
-""")
-
 # === Toggle between filtering methods ===
 st.sidebar.title("📊 Navigation")
 filter_mode = st.sidebar.radio(
@@ -1481,6 +1473,7 @@ elif filter_mode == "AOT Monthly Calendar":
             planet_data[name] = {"deg": lon, "speed": speed}
 
         day_type = "-"
+        reason = ""
         for p1, p2 in combinations(planet_data.keys(), 2):
             r1 = planet_rank.get(p1, 999)
             r2 = planet_rank.get(p2, 999)
@@ -1492,6 +1485,7 @@ elif filter_mode == "AOT Monthly Calendar":
 
             if abs(diff) <= 1.0:
                 day_type = "Red Day" if diff < 0 else "Green Day"
+                reason = f"{fast}→{slow}: {diff}°"
                 break
 
         # === Fixed Time: 9:00 AM IST for D1 and D9 Type Classification
@@ -1706,6 +1700,7 @@ elif filter_mode == "AOT Monthly Calendar":
         rows.append({
             "Date": current.strftime("%Y-%m-%d"),
             "Day Type": day_type,
+            "Reason": reason,
             "Moon & Mercury D1 Type": mm_d1_status,
             "Moon & Mercury D9 Type": mm_d9_status,
             "Moon & Mercury D1 Aspect": d1_aspect,
@@ -1734,4 +1729,3 @@ elif filter_mode == "AOT Monthly Calendar":
     st.markdown(f'<div class="scroll-table">{html}</div>', unsafe_allow_html=True)
 
     st.dataframe(df)
-
