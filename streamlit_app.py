@@ -1572,10 +1572,10 @@ elif filter_mode == "AOT Monthly Calendar":
 
         # === D1 Aspect Detection
         d1_aspect_result = "0"
-        for hour in range(0, 24):
-            dt = datetime(current.year, current.month, current.day, hour)
+        for hour in range(0, 23):
+            dt = datetime(current.year, current.month, current.day, hour, 0, 0)
             utc_dt = dt - timedelta(hours=TZ_OFFSET)
-            jd_hour = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour)
+            jd_hour = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour + utc_dt.minute / 60)
             flag = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
 
             longitudes = {}
@@ -1595,10 +1595,10 @@ elif filter_mode == "AOT Monthly Calendar":
 
         # === D9 Aspect Detection
         d9_aspect_result = "0"
-        for hour in range(8, 17):  # 8 AM to 4 PM
-            dt = datetime(current.year, current.month, current.day, hour)
+        for hour in range(8, 16):  # 8 AM to 4 PM
+            dt = datetime(current.year, current.month, current.day, hour, 0, 0)
             utc_dt = dt - timedelta(hours=TZ_OFFSET)
-            jd_hour = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour)
+            jd_hour = swe.julday(utc_dt.year, utc_dt.month, utc_dt.day, utc_dt.hour  + utc_dt.minute / 60)
             flag = swe.FLG_SIDEREAL | swe.FLG_SWIEPH
 
             longitudes = {}
@@ -1649,7 +1649,6 @@ elif filter_mode == "AOT Monthly Calendar":
         nak_index = int(asc // (360 / 27))
         pada = int(((asc % (360 / 27)) // (360 / 27 / 4)) + 1)
         nak = nakshatras[nak_index]
-
 
         # === Moon–Mercury D1 Type
         moon_d1 = get_planet_deg(jd, "Moon")
