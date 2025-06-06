@@ -726,13 +726,21 @@ elif filter_mode == "Planetary Report":
         d9_movable_count = d9_types.count("Movable")
         d9_fixed_count   = d9_types.count("Fixed")
 
-        # 5) Moon & Mercury combined status (for highlighting)
-        if moon_d1_type == "Movable" and mercury_d1_type == "Movable":
-            mm_status = "Moon & Mercury: Movable"
-        elif moon_d1_type == "Fixed" and mercury_d1_type == "Fixed":
-            mm_status = "Moon & Mercury: Fixed"
+        # 5a) D1 combined classification
+        if moon_d1_type == mercury_d1_type:
+            mm_d1_status = f"Moon & Mercury: {moon_d1_type}"
         else:
-            mm_status = f"Moon: {moon_d1_type}, Mercury: {mercury_d1_type}"
+            mm_d1_status = f"Moon: {moon_d1_type}, Mercury: {mercury_d1_type}"
+
+        # 5b) D9 combined classification
+        moon_d9_type = classify_sign_type(custom_d9_map[signs[int(moon_d9_lon // 30)]])
+        mercury_d9_type = classify_sign_type(custom_d9_map[signs[int(mercury_d9_lon // 30)]])
+
+        if moon_d9_type == mercury_d9_type:
+            mm_d9_status = f"Moon & Mercury: {moon_d9_type}"
+        else:
+            mm_d9_status = f"Moon: {moon_d9_type}, Mercury: {mercury_d9_type}"
+
 
         # 6) Compute Moon→Mercury and Mercury→Moon diffs for D1
         #    → raw signed diff (0–360), convert to (−180…+180)
@@ -790,8 +798,9 @@ elif filter_mode == "Planetary Report":
             "D9 Fixed": d9_fixed_count,
             "Moon & Mercury D1": mm_d1_label,
             "Moon & Mercury D9": mm_d9_label,
-            "Moon & Mercury": mm_status
-        })
+            "Moon & Mercury D1 Type": mm_d1_status,
+            "Moon & Mercury D9 Type": mm_d9_status
+            })
 
         current_date += datetime.timedelta(days=1)
 
@@ -802,13 +811,14 @@ elif filter_mode == "Planetary Report":
     def render_highlighted_report(df):
         rows_html = []
         for _, row in df.iterrows():
-            status = row["Moon & Mercury"]
+            status = row["Moon & Mercury D1 Type"]
             if status.strip() == "Moon & Mercury: Movable":
                 style = "background-color: black; color: white;"
             elif status.strip() == "Moon & Mercury: Fixed":
-                style = "background-color: #ffcccc;"  
+                style = "background-color: #ffcccc;"
             else:
                 style = ""
+
 
             cells = "".join([f"<td>{row[col]}</td>" for col in df.columns])
             rows_html.append(f"<tr style='{style}'>{cells}</tr>")
@@ -1641,21 +1651,31 @@ elif filter_mode == "AOT Monthly Calendar":
         nak = nakshatras[nak_index]
 
 
-        # === Moon–Mercury Sign Classification
+        # === Moon–Mercury D1 Type
         moon_d1 = get_planet_deg(jd, "Moon")
         mercury_d1 = get_planet_deg(jd, "Mercury")
         moon_sign = int(moon_d1 // 30)
         mercury_sign = int(mercury_d1 // 30)
-        moon_type = classify_sign_type(custom_d1_map[signs[moon_sign]])
-        mercury_type = classify_sign_type(custom_d1_map[signs[mercury_sign]])
+        moon_d1_type = classify_sign_type(custom_d1_map[signs[moon_sign]])
+        mercury_d1_type = classify_sign_type(custom_d1_map[signs[mercury_sign]])
 
-        if moon_type == "Movable" and mercury_type == "Movable":
-            mm_status = "Moon & Mercury: Movable"
-        elif moon_type == "Fixed" and mercury_type == "Fixed":
-            mm_status = "Moon & Mercury: Fixed"
+        if moon_d1_type == mercury_d1_type:
+            mm_d1_status = f"Moon & Mercury: {moon_d1_type}"
         else:
-            mm_status = f"Moon: {moon_type}, Mercury: {mercury_type}"
+            mm_d1_status = f"Moon: {moon_d1_type}, Mercury: {mercury_d1_type}"
 
+        # === Moon–Mercury D9 Type
+        moon_d9 = get_d9_longitude(moon_d1)
+        mercury_d9 = get_d9_longitude(mercury_d1)
+        moon_d9_sign = int(moon_d9 // 30)
+        mercury_d9_sign = int(mercury_d9 // 30)
+        moon_d9_type = classify_sign_type(moon_d9_sign + 1)
+        mercury_d9_type = classify_sign_type(mercury_d9_sign + 1)
+
+        if moon_d9_type == mercury_d9_type:
+            mm_d9_status = f"Moon & Mercury: {moon_d9_type}"
+        else:
+            mm_d9_status = f"Moon: {moon_d9_type}, Mercury: {mercury_d9_type}"
 
         # === Moon–Mercury D1 Aspect (0–23 IST)
         d1_aspect = "0"
@@ -1688,7 +1708,8 @@ elif filter_mode == "AOT Monthly Calendar":
         rows.append({
             "Date": current.strftime("%Y-%m-%d"),
             "Day Type": day_type,
-            "Moon & Mercury": mm_status,
+            "Moon & Mercury D1 Type": mm_d1_status,
+            "Moon & Mercury D9 Type": mm_d9_status,
             "D1 Aspect": d1_aspect,
             "D9 Aspect": d9_aspect,
             "Ascendant Nakshatra": nak,
